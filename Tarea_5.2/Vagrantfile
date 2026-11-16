@@ -1,0 +1,36 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/noble64"
+
+  # NODO 1: Servidor_1_Redes (NAT + Modo Puente / Bridged)
+  config.vm.define "Servidor_1_Redes" do |srv1|
+    srv1.vm.hostname = "servidor1-redes"
+    srv1.vm.network "public_network", bridge: "Intel(R) Dual Band Wireless-AC 8265"
+    srv1.vm.synced_folder "./compartida_srv1", "/media/sf_Compartida_Tarea", create: true
+
+    srv1.vm.provider "virtualbox" do |vb|
+      vb.name = "Servidor_1_Redes"
+      vb.memory = "1024"
+      vb.cpus = 1
+    end
+
+    srv1.vm.provision "shell", path: "provision_redes.sh", args: ["frontera"]
+  end
+
+  # NODO 2: Servidor_2_Backendddd (Aislado / Solo-Anfitrión Host-Only)
+  config.vm.define "Servidor_2_Backendddd" do |srv2|
+    srv2.vm.hostname = "servidor2-backend"
+    srv2.vm.network "private_network", ip: "192.168.56.103"
+    srv2.vm.synced_folder "./compartida_srv2", "/media/sf_Compartida_Backend", create: true
+
+    srv2.vm.provider "virtualbox" do |vb|
+      vb.name = "Servidor_2_Backendddd"
+      vb.memory = "1024"
+      vb.cpus = 1
+    end
+
+    srv2.vm.provision "shell", path: "provision_redes.sh", args: ["backend"]
+  end
+end
